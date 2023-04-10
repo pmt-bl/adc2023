@@ -1,8 +1,31 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<style>
+	.container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+	.div {
+		height: 300px;
+	}
+	.img {
+		height: 100%;
+	    aspect-ratio: 1/1;
+		object-fit: cover;
+    	object-position: center;
+	}
+	</style>
+</head>
 <body>
-<h1>This is not the page you are looking for</h1>
-<img src="../img/steven.jpg"></img>
-<p>Page not found!</p>
+	<div class="container">
+		<h1>This is not the page you are looking for</h1>
+		<div class="div">
+			<img class="img" src="../img/steven.jpg"></img>
+		</div>
+		<p>Page not found!</p>
+	</div>
 </body>
 </html>
