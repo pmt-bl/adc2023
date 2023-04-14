@@ -37,15 +37,24 @@ public class RegisterResource {
 		
 		LOG.fine("Creating user: " + data.username);
 		
-		//Checks input data
-		
-		if(!data.validRegistration() ) {
+		// Checks input data		
+		if( !data.validRegistration() ) {
 			return Response.status(Status.BAD_REQUEST).entity("Missing or wrong parameter.").build();
 		}
 		
+		// Checks password length
+		if( !data.pwdRestriction() ) {
+			return Response.status(Status.BAD_REQUEST).entity("Password must contain at least 6 digits.").build();
+		}
+		
+		// Checks if confirmation equals password
+		if( !data.matchingPwd() ) {
+			return Response.status(Status.BAD_REQUEST).entity("Passwords don't match.").build();
+		}
+		
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
 			Entity user = txn.get(userKey);
 			if(user != null) {
 				txn.rollback();
@@ -55,6 +64,7 @@ public class RegisterResource {
 						.set("user_name", data.name)
 						.set("user_pwd", DigestUtils.sha3_512Hex(data.password))
 						.set("user_email", data.email)
+						.set("user_role", data.role)
 						.set("user_creation_time", Timestamp.now())
 						.build();
 				txn.add(user);

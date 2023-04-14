@@ -4,6 +4,42 @@
         <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>My Web Application</title>
+        <script>
+            function submitForm(){
+                    const form = document.getElementById('myForm');
+                    const url = 'https://grand-citadel-379315.oa.r.appspot.com/rest/register';
+                    
+                    const formData = new FormData(form);
+
+				    const formDataObject = {};
+					formData.forEach((value, key) => {
+					  formDataObject[key] = value;
+					});
+					
+					const jsonData = JSON.stringify(formDataObject);
+					
+					fetch(url, {
+					    method: 'POST',
+					    headers: {
+					      'Content-Type': 'application/json'
+					    },
+					    body: jsonData
+					  })
+					  .then(response => {
+					    if (!response.ok) {
+					      throw new Error('Network response was not ok');
+					    }
+					    return response.json();
+					  })
+					  .then(data => {
+					    console.log(data);
+					  })
+					  .catch(error => {
+					    console.error('There was a problem with the fetch operation:', error);
+					  });
+
+                }
+        </script>
         <style>
             html{
                 height: 100%;
@@ -47,6 +83,7 @@
                 border-radius: 10px;
                 box-shadow: 0px 0px 5px rgb(0,0,0,0.6);
                 padding: 5px;
+                outline: none;
             }
             .button{
                 margin-top: 10px;
@@ -60,6 +97,10 @@
                 font-size: 16px;
                 font-weight: bold;
                 cursor: pointer;
+                transition: background-color 0.5s;
+            }
+            .button:hover{
+            	background-color: rgb(238,174,202);
             }
         </style>
     </head>
@@ -68,7 +109,7 @@
             <h1>Welcome To My Web Application</h1>
             <h3>Go ahead, register yourself</h3>
             <div class="form-container">
-                <form class="form" action="http://localhost:8080/rest/register" method="post">
+                <form class="form">
                     <div class="input-container">
                         <label for="usernamename">Username</label>
                         <input name="username" id="username" class="input" type="text">
@@ -85,7 +126,11 @@
                         <label for="password">Password</label>
                         <input name="password" id="password" class="input" type="text">
                     </div>
-                    <button class="button">Register</button>
+                    <div class="input-container">
+                        <label for="confirmation">Confirm Password</label>
+                        <input name="confirmation" id="confirmation" class="input" type="text">
+                    </div>
+                    <button class="button" onclick="submitForm()">Register</button>
                 </form>
             </div>
         </div>
