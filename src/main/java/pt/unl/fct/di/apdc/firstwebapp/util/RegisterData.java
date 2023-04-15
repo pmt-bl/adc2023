@@ -7,17 +7,31 @@ public class RegisterData {
 	public String name;
 	public String password;
 	public String confirmation;
-	public String role;
-	public String active;
 	
-	public RegisterData(String username, String email, String name, String password, String confirmation) {
+	public String privacy;
+	public Long phoneNum;
+	public String job;
+	public String workplace;
+	public String address;
+	public String nif;
+	
+	
+	public RegisterData() {}
+	
+	public RegisterData(String username, String email, String name, String password, String confirmation, String privacy,
+			long phoneNum, String job, String workplace, String address, String nif) {
 		this.username = username;
 		this.email = email;
 		this.name= name;
 		this.password = password;
 		this.confirmation = confirmation;
-		this.role = "USER";
-		this.active = "INACTIVE";
+		this.privacy = privacy;
+		this.phoneNum = phoneNum;
+		this.job = job;
+		this.workplace = workplace;
+		this.address = address;
+		this.nif = nif;
+
 	}
 	
 	private boolean validEmail() {

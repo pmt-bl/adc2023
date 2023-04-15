@@ -64,7 +64,14 @@ public class RegisterResource {
 						.set("user_name", data.name)
 						.set("user_pwd", DigestUtils.sha3_512Hex(data.password))
 						.set("user_email", data.email)
-						.set("user_role", data.role)
+						.set("user_role", "USER")
+						.set("user_state", "INACTIVE")
+						.set("user_privacy", data.privacy)
+						.set("user_phoneNum", data.phoneNum)
+						.set("user_job", data.job)
+						.set("user_workplace", data.workplace)
+						.set("user_address", data.address)
+						.set("user_nif", data.nif)
 						.set("user_creation_time", Timestamp.now())
 						.build();
 				txn.add(user);

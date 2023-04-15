@@ -30,7 +30,7 @@ public class PasswordData {
 	}
 	
 	public boolean confirmedPwd() {
-		return pwd.equals(confirmation);
+		return newpwd.equals(confirmation);
 	}
 
 }

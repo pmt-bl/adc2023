@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -19,7 +18,6 @@ import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.firstwebapp.util.LoginData;
-import pt.unl.fct.di.apdc.firstwebapp.util.PasswordData;
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -46,9 +44,6 @@ public class LoginResource {
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8") 
 	public Response doLogin(LoginData data, @Context HttpServletRequest request, @Context HttpHeaders headers) {
         LOG.fine("Attempt to login user: " + data.username);
-
-        // KEYS SHOULD BE GENERATED OUTSIDE TRANSACTIONS
-        // Construct the key from the username
 
         Key userKey = userKeyFactory.newKey(data.username);
         Key tokenKey = tokenKeyFactory.newKey(data.username);
@@ -104,18 +99,18 @@ public class LoginResource {
 
                 // Batch operation
                 txn.put(log, ustats);
-                txn.commit();
                 
                 // Return token
-                AuthToken token = new AuthToken(data.username);
+                AuthToken token = new AuthToken(data.username, user.getString("user_role"));
                 
                 Entity dataToken = txn.get(tokenKey);
                 if(dataToken == null){
                 	dataToken = Entity.newBuilder(tokenKey)
+                			.set("token_user", data.username)
                             .set("token_id",token.tokenID)
                             .set("token_expireDate",token.expirationData)
                             .set("token_creation_data", token.creationData)
-                            .set("token_user_role", user.getProperties().get("user_role"))
+                            .set("token_user_role", token.userRole)
                             .build();   
                 	
                     txn.put(dataToken);
@@ -145,76 +140,9 @@ public class LoginResource {
             LOG.severe(e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Exception").build();
         } finally {
-            if (txn.isActive()) {
+            if (txn.isActive()) 
                 txn.rollback();
-                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Finally").build();
-            }
         }
     }
-	
-	@PUT
-	@Path("/pwd")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8") 
-	public Response changePassword(PasswordData data) {
-		LOG.fine("Attempt to change " + data.username + "'s password");
-		
-		Key userKey = userKeyFactory.newKey(data.username);
-        Key tokenKey = tokenKeyFactory.newKey(data.username);
-        
-        Transaction txn = datastore.newTransaction();
-        try {
-        	Entity User = txn.get(userKey);
-        	Entity Token = txn.get(tokenKey);
-        	
-        	if(User == null) {
-                LOG.warning("Failed pwd change attempt for username: " + data.username);
-                return Response.status(Status.FORBIDDEN).build();
-        	}
-        	
-        	if(Token == null) {
-                LOG.warning("No token on pwd change attempt");
-                return Response.status(Response.Status.FORBIDDEN).entity("Login User.").build();
-			}
-			if(System.currentTimeMillis() > Token.getLong("token_expireDate")){
-				txn.delete(tokenKey);
-				txn.commit();
-				LOG.warning("Expired token on pwd change attempt");
-                return Response.status(Response.Status.FORBIDDEN).entity("Expired session, please login.").build();
-			}
-			
-			if(!User.getString("user_pwd").equals(DigestUtils.sha3_512Hex(data.pwd))) {
-				LOG.warning("Incorrect pwd on pwd change attempt");
-                return Response.status(Response.Status.FORBIDDEN).entity("Incorrect password.").build();
-			}
-        	
-        	if(!data.validData()) {
-        		LOG.warning("Null parameters on pwd change attempt");
-                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Data.").build();
-        	}
-        	if(!data.pwdRestriction()) {
-        		LOG.warning("Restricted pwd on pwd change attempt");
-                return Response.status(Response.Status.BAD_REQUEST).entity("Password must contain at least 6 digits.").build();
-        	}
-        	
-        	if(!data.validPwd() || !data.confirmedPwd()) {
-        		LOG.warning("Invalid pwd on pwd change attempt");
-                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid password.").build();
-        	}
-    		
-        	User = Entity.newBuilder(User)
-    				.set("user_pwd", DigestUtils.sha3_512Hex(data.newpwd))
-    				.build();
-    		txn.update(User);
-    		txn.commit();
-    		return Response.ok().build();
-        	
-        }
-        finally {
-			if(txn.isActive())
-				txn.rollback();
-        }
-	}
-	
 
 }

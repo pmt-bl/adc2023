@@ -6,7 +6,7 @@
         <title>My Web Application</title>
         <script>
             function submitForm(){
-                    const form = document.getElementById('myForm');
+                    const form = document.getElementById('form');
                     const url = 'https://grand-citadel-379315.oa.r.appspot.com/rest/register';
                     
                     const formData = new FormData(form);
@@ -26,10 +26,19 @@
 					    body: jsonData
 					  })
 					  .then(response => {
-					    if (!response.ok) {
-					      throw new Error('Network response was not ok');
+					  	const responseCode = response.status;
+					
+					    if (responseCode === 200) {
+					      const linkElement = document.createElement('a');
+					      linkElement.href = '';
+					      linkElement.textContent = 'Click here to go to the success page';
+					      document.getElementById('container').appendChild(linkElement);
 					    }
-					    return response.json();
+					    else {
+					      const responseElement = document.createElement('p');
+					      responseElement.textContent = `Response code: ${responseCode}`;
+					      document.getElementById('container').appendChild(responseElement);
+					    }
 					  })
 					  .then(data => {
 					    console.log(data);
@@ -105,11 +114,11 @@
         </style>
     </head>
     <body>
-        <div class="container">
+        <div id="container" class="container">
             <h1>Welcome To My Web Application</h1>
             <h3>Go ahead, register yourself</h3>
             <div class="form-container">
-                <form class="form">
+                <form id="form" class="form" method="POST">
                     <div class="input-container">
                         <label for="usernamename">Username</label>
                         <input name="username" id="username" class="input" type="text">
