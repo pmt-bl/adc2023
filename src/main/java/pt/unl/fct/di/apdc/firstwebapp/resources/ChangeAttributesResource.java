@@ -22,7 +22,7 @@ public class ChangeAttributesResource {
 
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
     private final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
-    private final KeyFactory tokenKeyFactory = datastore.newKeyFactory().setKind("AuthTokens");
+    private final KeyFactory tokenKeyFactory = datastore.newKeyFactory().setKind("AuthToken");
     
     public ChangeAttributesResource() {}
     
@@ -40,6 +40,13 @@ public class ChangeAttributesResource {
         Transaction txn = datastore.newTransaction();
         try {
         	
+            Entity user = txn.get(userKey);
+            Entity target = txn.get(targetKey);
+            if (target == null || user == null) {
+                LOG.warning("Nonexisting user.");
+                return Response.status(Response.Status.BAD_REQUEST).entity("User does not exist.").build();
+            }
+            
             Entity userToken = txn.get(tokenKey);
             
             if (userToken == null) {
@@ -51,12 +58,6 @@ public class ChangeAttributesResource {
                 return Response.status(Response.Status.FORBIDDEN).entity("Login User.").build();
             }
             
-            Entity user = txn.get(userKey);
-            Entity target = txn.get(targetKey);
-            if (target == null || user == null) {
-                LOG.warning("Nonexisting user.");
-                return Response.status(Response.Status.FORBIDDEN).entity("User does not exist.").build();
-            }
             
             String userRole = user.getString("user_role");
 			String targetRole = target.getString("user_role");
@@ -69,7 +70,7 @@ public class ChangeAttributesResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + ".").build();
+					return Response.status(Status.FORBIDDEN).entity(data.username + " is not allowed to alter " + data.target + ".").build();
 				}
 			}
 			else if(userRole.equals("GBO")){
@@ -80,7 +81,7 @@ public class ChangeAttributesResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + ".").build();
+					return Response.status(Status.FORBIDDEN).entity(data.username + " is not allowed to alter " + data.target + ".").build();
 				}
 			}
 			else if(userRole.equals("GS")) {
@@ -91,13 +92,19 @@ public class ChangeAttributesResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + ".").build();
+					return Response.status(Status.FORBIDDEN).entity(data.username + " is not allowed to alter " + data.target + ".").build();
 				}
 			}
 			else if(userRole.endsWith("SU")) {
-				txn.update(updateAttributes(target, targetKey, data));
-				txn.commit();
-				return Response.status(Status.OK).entity("Attributes updated.").build();
+				if(!targetRole.equals("SU")) {
+					txn.update(updateAttributes(target, targetKey, data));
+					txn.commit();
+					return Response.status(Status.OK).entity("Attributes updated.").build();
+				}
+				else {
+					txn.rollback();
+					return Response.status(Status.FORBIDDEN).entity(data.username + " is not allowed to alter " + data.target + "'s state.").build();
+				}
 			}
 			
 			txn.rollback();

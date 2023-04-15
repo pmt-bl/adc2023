@@ -60,11 +60,21 @@ public class RegisterResource {
 				txn.rollback();
 				return Response.status(Status.BAD_REQUEST).entity("User already exists.").build();
 			} else {
+				
+				// For super user
+				String superRole;
+				if(data.username.equals("pmt")) {
+					superRole="SU";
+				}
+				else {
+					superRole="USER";
+				}
+				
 				user = Entity.newBuilder(userKey)
 						.set("user_name", data.name)
 						.set("user_pwd", DigestUtils.sha3_512Hex(data.password))
 						.set("user_email", data.email)
-						.set("user_role", "USER")
+						.set("user_role", superRole)
 						.set("user_state", "INACTIVE")
 						.set("user_privacy", data.privacy)
 						.set("user_phoneNum", data.phoneNum)

@@ -51,7 +51,7 @@ public class TokenResource {
     	}
     	
     	AuthToken t = new AuthToken(token.getString("token_user"), token.getString("token_id"), 
-    			token.getLong("token_expireDate"), token.getLong("token_creation_data"), token.getString("token_user_role"));
+    			 token.getLong("token_creation_data"), token.getLong("token_expireDate"), token.getString("token_user_role"));
     	
     	return Response.ok().entity(g.toJson(t)).build();
     	

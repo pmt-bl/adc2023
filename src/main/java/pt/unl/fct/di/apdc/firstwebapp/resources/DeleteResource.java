@@ -38,6 +38,7 @@ public class DeleteResource {
 		Key userKey = datastore.newKeyFactory().setKind("User").newKey(user);
 		Key targetKey = datastore.newKeyFactory().setKind("User").newKey(target);
 		Key tokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(user);
+		Key targetTokenKey = datastore.newKeyFactory().setKind("AuthToken").newKey(target);
 
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -72,6 +73,7 @@ public class DeleteResource {
 				if(userRole.equals("USER")) {
 					if(user.equals(target)) {
 						txn.delete(targetKey);
+						txn.delete(targetTokenKey);
 						txn.commit();
 						return Response.status(Status.OK).entity("User removed.").build();
 					}
@@ -83,6 +85,7 @@ public class DeleteResource {
 				else if(userRole.equals("GBO")){
 					if(targetRole.equals("USER")) {
 						txn.delete(targetKey);
+						txn.delete(targetTokenKey);
 						txn.commit();
 						return Response.status(Status.OK).entity("User removed.").build();
 					}
@@ -94,6 +97,7 @@ public class DeleteResource {
 				else if(userRole.equals("GS")) {
 					if(targetRole.equals("USER") || targetRole.equals("GBO")) {
 						txn.delete(targetKey);
+						txn.delete(targetTokenKey);
 						txn.commit();
 						return Response.status(Status.OK).entity("User removed.").build();
 					}
@@ -104,6 +108,7 @@ public class DeleteResource {
 				}
 				else if(userRole.endsWith("SU")) {
 					txn.delete(targetKey);
+					txn.delete(targetTokenKey);
 					txn.commit();
 					return Response.status(Status.OK).entity("User removed.").build();
 				}

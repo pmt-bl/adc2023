@@ -11,6 +11,8 @@ public class AttributeData {
 	public String address;
 	public String nif;
 	
+	public AttributeData() {}
+	
 	public AttributeData(String username, String target, String privacy,
 			long phoneNum, String job, String workplace, String address, String nif) {
 		this.username = username;

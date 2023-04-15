@@ -27,7 +27,7 @@ public class ChangeStateResource {
 
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
     private final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
-    private final KeyFactory tokenKeyFactory = datastore.newKeyFactory().setKind("AuthTokens");
+    private final KeyFactory tokenKeyFactory = datastore.newKeyFactory().setKind("AuthToken");
     
     public ChangeStateResource() {}
     
@@ -36,7 +36,7 @@ public class ChangeStateResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8") 
     public Response changeState(@PathParam("user") String User, @QueryParam("target") String Target) {
-    	LOG.fine("State change attempt by user ");
+    	LOG.fine("State change attempt by user " + User);
     	
     	Key userKey = userKeyFactory.newKey(User);
         Key targetKey = userKeyFactory.newKey(Target);
@@ -44,6 +44,13 @@ public class ChangeStateResource {
         
         Transaction txn = datastore.newTransaction();
         try {
+        	
+            Entity user = txn.get(userKey);
+            Entity target = txn.get(targetKey);
+            if (target == null || user == null) {
+                LOG.warning("Nonexisting user.");
+                return Response.status(Response.Status.BAD_REQUEST).entity("User does not exist.").build();
+            }
         	
             Entity userToken = txn.get(tokenKey);
             
@@ -55,13 +62,7 @@ public class ChangeStateResource {
                 LOG.warning("Expired token");
                 return Response.status(Response.Status.FORBIDDEN).entity("Login User.").build();
             }
-            
-            Entity user = txn.get(userKey);
-            Entity target = txn.get(targetKey);
-            if (target == null || user == null) {
-                LOG.warning("Nonexisting user.");
-                return Response.status(Response.Status.FORBIDDEN).entity("User does not exist.").build();
-            }
+         
             
             String userRole = user.getString("user_role");
 			String targetRole = target.getString("user_role");
@@ -74,7 +75,7 @@ public class ChangeStateResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + "'s state.").build();
+					return Response.status(Status.FORBIDDEN).entity(User + " is not allowed to alter " + Target + "'s state.").build();
 				}
 			}
 			else if(userRole.equals("GBO")){
@@ -85,7 +86,7 @@ public class ChangeStateResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + "'s state.").build();
+					return Response.status(Status.FORBIDDEN).entity(User + " is not allowed to alter " + Target + "'s state.").build();
 				}
 			}
 			else if(userRole.equals("GS")) {
@@ -96,13 +97,19 @@ public class ChangeStateResource {
 				}
 				else {
 					txn.rollback();
-					return Response.status(Status.FORBIDDEN).entity(user + " is not allowed to alter " + target + "'s state.").build();
+					return Response.status(Status.FORBIDDEN).entity(User + " is not allowed to alter " + Target + "'s state.").build();
 				}
 			}
 			else if(userRole.endsWith("SU")) {
-				txn.update(updateState(target, targetKey));
-				txn.commit();
-				return Response.status(Status.OK).entity("State updated.").build();
+				if(!targetRole.equals("SU")) {
+					txn.update(updateState(target, targetKey));
+					txn.commit();
+					return Response.status(Status.OK).entity("State updated.").build();
+				}
+				else {
+					txn.rollback();
+					return Response.status(Status.FORBIDDEN).entity(User + " is not allowed to alter " + Target + "'s state.").build();
+				}
 			}
 			
 			txn.rollback();

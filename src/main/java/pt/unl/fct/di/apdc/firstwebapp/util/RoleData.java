@@ -6,6 +6,8 @@ public class RoleData {
 	public String target;
 	public String role;
 	
+	public RoleData() {}
+	
 	public RoleData(String username, String target, String role) {
 		this.username = username;
 		this.target = target;
