@@ -95,7 +95,7 @@ public class ListUsersResource {
     				 
     				 ListUserData d = new ListUserData(u.getKey().toString(), u.getString("user_email"), u.getString("user_name"),
         					 u.getString("user_privacy"), u.getLong("user_phoneNum"), u.getString("user_job"), u.getString("user_workplace"),
-        					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"));
+        					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"), u.getString("user_state"));
         			 
         			 list.add(d);
     			 }
@@ -109,7 +109,7 @@ public class ListUsersResource {
     				 
     				 ListUserData d = new ListUserData(u.getKey().toString(), u.getString("user_email"), u.getString("user_name"),
         					 u.getString("user_privacy"), u.getLong("user_phoneNum"), u.getString("user_job"), u.getString("user_workplace"),
-        					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"));
+        					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"), u.getString("user_state"));
         			 
         			 list.add(d);
     			 }
@@ -121,7 +121,7 @@ public class ListUsersResource {
     			 
     			 ListUserData d = new ListUserData(u.getKey().toString(), u.getString("user_email"), u.getString("user_name"),
     					 u.getString("user_privacy"), u.getLong("user_phoneNum"), u.getString("user_job"), u.getString("user_workplace"),
-    					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"));
+    					 u.getString("user_address"), u.getString("user_nif"), u.getString("user_role"), u.getString("user_state"));
     			 
     			 list.add(d);
     		 }

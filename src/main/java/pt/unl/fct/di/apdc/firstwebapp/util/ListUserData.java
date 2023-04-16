@@ -13,6 +13,7 @@ public class ListUserData {
 	public String address;
 	public String nif;
 	public String role;
+	public String state;
 	
 	public ListUserData() {}
 	
@@ -23,7 +24,7 @@ public class ListUserData {
 	}
 	
 	public ListUserData(String username, String email, String name, String privacy, 
-			Long phoneNum, String job, String workplace, String address, String nif, String role) {
+			Long phoneNum, String job, String workplace, String address, String nif, String role, String state) {
 		this.username = username;
 		this.email = email;
 		this.name = name;
@@ -34,6 +35,7 @@ public class ListUserData {
 		this.address = address;
 		this.nif = nif;
 		this.role = role;
+		this.state = state;
 	}
 
 }

@@ -116,6 +116,14 @@ public class LoginResource {
                     txn.put(dataToken);
                     txn.commit();
                 }
+                else {
+                	dataToken = Entity.newBuilder(tokenKey, dataToken)
+                			.set("token_expireDate", System.currentTimeMillis() + AuthToken.EXPIRATION_TIME)
+                			.build();
+                	
+                	txn.put(dataToken);
+                    txn.commit();
+                }
                 
                 LOG.info("User '" + data.username + "' logged in successfully.");
                 return Response.ok(g.toJson(token)).build();

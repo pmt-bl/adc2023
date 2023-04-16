@@ -49,6 +49,7 @@ public class ChangeStateResource {
             Entity target = txn.get(targetKey);
             if (target == null || user == null) {
                 LOG.warning("Nonexisting user.");
+				txn.rollback();
                 return Response.status(Response.Status.BAD_REQUEST).entity("User does not exist.").build();
             }
         	
@@ -56,10 +57,12 @@ public class ChangeStateResource {
             
             if (userToken == null) {
                 LOG.warning("Nonexisting token.");
+				txn.rollback();
                 return Response.status(Response.Status.FORBIDDEN).entity("Login User.").build();
             }        
             if (System.currentTimeMillis() > userToken.getLong("token_expireDate")) {
                 LOG.warning("Expired token");
+				txn.rollback();
                 return Response.status(Response.Status.FORBIDDEN).entity("Login User.").build();
             }
          
